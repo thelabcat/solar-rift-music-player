@@ -3,6 +3,9 @@
 Play the adaptive music from Solar Rift,
 with the ability to adjust the danger level.
 
+This code is under the Creative Commons Attribution 4.0 license.
+See https://creativecommons.org/licenses/by/4.0/ for details.
+
 S.D.G.
 """
 
