@@ -94,10 +94,10 @@ class AreaMusicPlayer:
         # Save the trimmed audio to a tempfile
         tf = tempfile.NamedTemporaryFile(suffix=file_suffix)
         pds.export(tf)
-        tf.file.close()
+        tf.file.flush()
 
         # Load the tempfile into PyGame, then delete it
-        s = mixer.Sound(tf.name)
+        s = mixer.Sound(tf)
         tf.close()
 
         print("Loaded", fn)
