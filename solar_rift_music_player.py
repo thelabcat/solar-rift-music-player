@@ -39,10 +39,13 @@ GAME_AREA_NAMES = list(TRIM_VALUES.keys())
 
 # Get all the filenames of the OST mp3s
 print("Looking for renamed MP3s")
-ALL_AUDIO_FNS = glob.glob("*.mp3", root_dir=OST_PATH)
+aafs = glob.glob("*.mp3", root_dir=OST_PATH)
+aafs.sort()  # Files may not be in order if we are in temp exe storage
+ALL_AUDIO_FNS = aafs
 for fn in ALL_AUDIO_FNS:
     print(OST_PATH + os.sep + fn)
 
+# Start PyGame Mixer
 mixer.init()
 
 
