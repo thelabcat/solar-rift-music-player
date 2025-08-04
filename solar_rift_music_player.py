@@ -11,7 +11,6 @@ S.D.G.
 
 import glob
 import os
-import tempfile
 import tkinter as tk
 from tkinter import ttk
 import pydub
@@ -37,13 +36,29 @@ MAX_DANGER_LEVEL = 100
 # The names of the various areas in-game
 GAME_AREA_NAMES = list(TRIM_VALUES.keys())
 
+# The filename extension of the music files
+MUSIC_SUFFIX = ".mp3"
+
+# The folder to put/load pre-trimmed music in
+PRE_TRIMMED_FOLDERNAME = "pre-trimmed"
+PRE_TRIMMED_FOLDER = os.path.join(OST_PATH, PRE_TRIMMED_FOLDERNAME)
+
+# Wether or not trimming has already been performed
+PRE_TRIMMED = os.path.exists(PRE_TRIMMED_FOLDER)
+
 # Get all the filenames of the OST mp3s
-print("Looking for renamed MP3s")
-aafs = glob.glob("*.mp3", root_dir=OST_PATH)
+if PRE_TRIMMED:
+    print("Looking for pre-trimmed MP3s")
+    aafs = glob.glob("*" + MUSIC_SUFFIX, root_dir=PRE_TRIMMED_FOLDER)
+else:
+    print("Looking for renamed original MP3s")
+    aafs = glob.glob("*" + MUSIC_SUFFIX, root_dir=OST_PATH)
 aafs.sort()  # Files may not be in order if we are in temp exe storage
-ALL_AUDIO_FNS = aafs
-for fn in ALL_AUDIO_FNS:
-    print(OST_PATH + os.sep + fn)
+
+# Get only related files
+AUDIO_FNS = [fn for fn in aafs if True in [area in fn for area in GAME_AREA_NAMES]]
+for fn in AUDIO_FNS:
+    print(os.path.join(OST_PATH, fn))
 
 # Start PyGame Mixer
 mixer.init()
@@ -56,14 +71,18 @@ class AreaMusicPlayer:
         """Handle looping and danger levels of area music"""
 
         # Get and load the tracks that are associated with an area
-        print("Loading and trimming files")
+        if PRE_TRIMMED:
+            print("Loading pre-trimmed files")
+        else:
+            print("Loading and trimming files")
+
         self.game_area_tracks = {
             # For each area name
             an: [
                 # Load the sound in PyGame Mixer after trimming off the silence
-                self.load_and_trim(fn, an)
+                self.load_trimmed(fn, an)
                 # If the sound filename contains the area name
-                for fn in ALL_AUDIO_FNS if an in fn
+                for fn in AUDIO_FNS if an in fn
                 ]
             for an in GAME_AREA_NAMES
             }
@@ -74,8 +93,9 @@ class AreaMusicPlayer:
         # Current danger level
         self.__danger_level = 0
 
-    def load_and_trim(self, fn, an):
-        """Load an audio into PyGame after trimming it as needed
+    def load_trimmed(self, fn, an):
+        """Load an audio into PyGame after trimming it as needed,
+            or load the pre-trimmed version.
 
         Args:
             fn (str): The filename to load.
@@ -85,23 +105,25 @@ class AreaMusicPlayer:
             music (pygame.mixer.Sound): The loopable music sound.
         """
 
-        # Get the filename extension
-        file_suffix = "." + fn.split(".")[-1]
+        # Paths for where the trimmed and un-trimmed versions should be
+        pre_trimmed_path = os.path.join(PRE_TRIMMED_FOLDER, fn)
+        untrimmed_path = os.path.join(OST_PATH, fn)
 
-        # Load the audio into PyDub
-        pds = pydub.AudioSegment.from_file(OST_PATH + os.sep + fn)
+        # If we do not already have a trimmed version, create it
+        if not PRE_TRIMMED:
+            print("Performing trim on", fn)
+            # Load the audio into PyDub
+            pds = pydub.AudioSegment.from_file(untrimmed_path)
 
-        # Trim off the silence for the area
-        pds = pds[TRIM_VALUES[an][0] * 1000: -TRIM_VALUES[an][1] * 1000]
+            # Trim off the silence for the area
+            pds = pds[TRIM_VALUES[an][0] * 1000: -TRIM_VALUES[an][1] * 1000]
 
-        # Save the trimmed audio to a tempfile
-        tf = tempfile.NamedTemporaryFile(suffix=file_suffix)
-        pds.export(tf)
-        tf.file.flush()
+            # Save the trimmed audio to the pre-trimmed location
+            os.makedirs(PRE_TRIMMED_FOLDER, exist_ok = True)
+            pds.export(pre_trimmed_path)
 
-        # Load the tempfile into PyGame, then delete it
-        s = mixer.Sound(tf)
-        tf.close()
+        # Load the file into PyGame
+        s = mixer.Sound(pre_trimmed_path)
 
         print("Loaded", fn)
 
