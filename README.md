@@ -12,7 +12,7 @@ The program also relies on [FFmpeg](https://ffmpeg.org/), unless the `pre-trimme
 
 A packed executable version of the app, with Python and the Python dependencies (and the pre-trimmed music) all bundled, is available in [the Releases page of this repository](https://github.com/thelabcat/solar-rift-music-player/releases).
 
-When it launches, the app may take several seconds to trim off the silence at the ends of each track. Like I said, I have burned this trimming into the files viathe pre-trimmed versions, but (aside from the added meta and changed filenames) the program is also designed to make these trims from the original files exactly the way they were when I extracted them from the game SWF file.
+When it launches, the app may take several seconds to trim off the silence at the ends of each track. Like I said, I have burned this trimming into the files via the pre-trimmed versions, but (aside from the added meta and changed filenames) the program is also designed to be able to make these trims from the original files as they were when I extracted them from the game SWF file.
 
 You can listen to pre-mixed versions of the music with steadily increasing danger levels [here](https://rumble.com/playlists/HUIhonMpgFM), along with the main menu music, which is not adaptive.
 
